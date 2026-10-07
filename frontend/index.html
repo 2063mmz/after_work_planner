@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeOps Agent — Plan tonight around tomorrow</title>
+<meta name="description" content="An AI agent that plans your evening around tomorrow's schedule, your energy and your sleep needs.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🌙</text></svg>">
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 0 0 .5-9 6 6 0 0 0-11.6 1.5A3.75 3.75 0 0 0 7 19Z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"/></symbol>
+  <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0 5 5L15 16l-3 6-2-2 6-3 4.7-4.7"/><path d="m9 9-6 6 3 3"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h6a4 4 0 0 0 0-8H9a4 4 0 0 1 0-8h3"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 7h10M5 7l-3 7h6ZM19 7l-3 7h6Z"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.5 12.5 8-8M17 6l2.5 2.5M14.5 8.5 17 11"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark"><svg><use href="#i-moon"/></svg></span>
+    <div class="brand-text">
+      <h1>LifeOps&nbsp;Agent</h1>
+      <p>Plan tonight around tomorrow.</p>
+    </div>
+  </div>
+  <div class="topbar-meta">
+    <span class="chip chip--agent"><svg class="ico"><use href="#i-tool"/></svg>LangChain&nbsp;·&nbsp;Gemini&nbsp;·&nbsp;8 tools</span>
+    <span class="chip" id="status-chip"><span class="dot dot--idle"></span><span id="status-text">Checking backend…</span></span>
+  </div>
+</header>
+
+<main class="workspace">
+
+  <!-- ─────────────────────────  COMMAND  ───────────────────────── -->
+  <section class="panel" aria-labelledby="h-command">
+    <div class="panel-head">
+      <h2 id="h-command"><svg class="ico"><use href="#i-bolt"/></svg>Your evening</h2>
+      <span class="panel-hint">Step 1</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="field key-field" id="key-field">
+        <div class="field-label field-label--row">
+          <span><svg class="ico"><use href="#i-key"/></svg> Gemini API key</span>
+          <span class="muted" id="key-requirement">required</span>
+        </div>
+        <div class="key-row">
+          <input id="api-key" type="password" autocomplete="off" spellcheck="false"
+                 placeholder="AIza…" aria-label="Your Gemini API key">
+          <button type="button" class="icon-btn" id="key-clear" title="Forget this key" aria-label="Forget this key"><svg class="ico"><use href="#i-x"/></svg></button>
+        </div>
+        <p class="fineprint">
+          Free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+          Kept in this browser only, sent to this app's server to run your request, never stored there.
+        </p>
+      </div>
+
+      <label class="field-label" for="message">Tell the agent what tonight looks like</label>
+      <textarea id="message" rows="6" spellcheck="false"
+        placeholder="I get home at 20:15. I need to cook, do laundry and review tomorrow's presentation. I have a 9 AM client meeting so I want to sleep early."></textarea>
+
+      <div class="examples" id="examples" aria-label="Example prompts"></div>
+
+      <fieldset class="field">
+        <legend class="field-label">Energy level</legend>
+        <div class="segmented" id="energy" role="radiogroup">
+          <button type="button" role="radio" data-value="low">Low</button>
+          <button type="button" role="radio" data-value="medium" aria-checked="true" class="is-active">Medium</button>
+          <button type="button" role="radio" data-value="high">High</button>
+        </div>
+      </fieldset>
+
+      <label class="field-label" for="location">Location <span class="muted">— for weather &amp; travel</span></label>
+      <div class="input-icon">
+        <svg class="ico"><use href="#i-pin"/></svg>
+        <input id="location" type="text" autocomplete="address-level2" placeholder="Paris, France">
+      </div>
+
+      <div class="field">
+        <div class="field-label field-label--row">
+          <span>Saved places</span>
+          <span class="muted" title="Stored in this browser only">local to this browser</span>
+        </div>
+        <ul class="places" id="places"></ul>
+        <form class="place-form" id="place-form">
+          <input id="place-name" type="text" placeholder="home" maxlength="40" aria-label="Place label" required>
+          <input id="place-value" type="text" placeholder="Paris 11e" maxlength="120" aria-label="Place address" required>
+          <button type="submit" class="icon-btn" title="Add place" aria-label="Add place"><svg class="ico"><use href="#i-plus"/></svg></button>
+        </form>
+      </div>
+
+      <button id="generate" class="primary-btn" type="button">
+        <svg class="ico"><use href="#i-sparkle"/></svg>
+        <span id="generate-label">Plan my evening</span>
+      </button>
+      <p class="fineprint">Your Gemini key stays on the server. Saved places never leave this browser.</p>
+
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  AGENT TRACE  ───────────────────────── -->
+  <section class="panel" aria-labelledby="h-trace">
+    <div class="panel-head">
+      <h2 id="h-trace"><svg class="ico"><use href="#i-tool"/></svg>Agent trace</h2>
+      <span class="panel-hint" id="trace-hint">Step 2</span>
+    </div>
+    <div class="panel-body">
+      <p class="panel-lede">Each card is a real tool call. The model decides which to run; the deterministic planner owns every clock time.</p>
+      <ol class="trace" id="trace"></ol>
+    </div>
+  </section>
+
+  <!-- ─────────────────────────  PLAN  ───────────────────────── -->
+  <section class="panel" aria-labelledby="h-plan">
+    <div class="panel-head">
+      <h2 id="h-plan"><svg class="ico"><use href="#i-clock"/></svg>Plan dashboard</h2>
+      <span class="panel-hint">Step 3</span>
+    </div>
+    <div class="panel-body" id="plan-body">
+      <div class="empty" id="plan-empty">
+        <span class="empty-mark"><svg><use href="#i-moon"/></svg></span>
+        <p><strong>No plan yet.</strong></p>
+        <p class="muted">Describe your evening on the left and the agent will build a timeline that protects tomorrow morning.</p>
+      </div>
+      <div id="plan-content" hidden></div>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
